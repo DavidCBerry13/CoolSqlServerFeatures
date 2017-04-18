@@ -91,8 +91,8 @@ SELECT * FROM RankedDailyHighs
 
 
 -- Warmest days across the state (vary our rank partition)
--- This has a different PARTITION BY in the RANK, so we get the highest
--- temp days, regardless of where in the state they occured
+-- Shows ranking in terms of across the state and for that city
+-- Uses DENSE_RANK, which has no gaps
 -- ----------------------------------------------------------------------------------
 WITH DailyHighTemps AS
 (
@@ -109,9 +109,15 @@ WITH DailyHighTemps AS
 		AND o.ObservationDate BETWEEN '2016-01-01' AND '2017-01-01'
 )
 SELECT 
-    City, Year, Month, Day, DailyHighTemp,
-	RANK() OVER (ORDER BY DailyHighTemp DESC) As TemperatureRank
-	FROM DailyHighTemps;
+    City, 
+	Year, 
+	Month, 
+	Day, 
+	DailyHighTemp,
+	DENSE_RANK() OVER (ORDER BY DailyHighTemp DESC) As StateTemperatureRank,
+	DENSE_RANK() OVER (PARTITION BY City ORDER BY DailyHighTemp DESC) As CityRank
+FROM DailyHighTemps
+ORDER BY DailyHighTemp DESC;
 
 	
 	
