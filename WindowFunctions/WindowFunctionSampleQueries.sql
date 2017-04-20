@@ -38,10 +38,78 @@ SELECT DISTINCT
    
 		
 		
+-- Third Example - Cannot use Window Function in WHERE clause
+-- -------------------------------------------------------------------------------		
 		
--- Third Example
+-- This will fail
+SELECT DISTINCT
+        YEAR(ObservationDate) AS Year,
+	    MONTH(ObservationDate) AS Month,
+		DAY(ObservationDate) As Day,		
+		MAX(o.DryBulbFarenheit) OVER (PARTITION BY YEAR(ObservationDate), MONTH(ObservationDate), DAY(ObservationDate)) As DailyHighTemp
+    FROM WeatherObservations o
+	WHERE
+	    State = 'MN'
+		AND City = 'Minneapolis'
+		AND ObservationDate BETWEEN '2016-01-01' AND '2016-12-31'
+		MAX(o.DryBulbFarenheit) OVER (PARTITION BY YEAR(ObservationDate), MONTH(ObservationDate), DAY(ObservationDate)) > 90;
+		
+		
+		
+		
+-- So we can introduce a Common Table Expression
+		
+WITH DailyHighTemps AS
+(
+    SELECT DISTINCT
+        YEAR(ObservationDate) AS Year,
+	    MONTH(ObservationDate) AS Month,
+		DAY(ObservationDate) As Day,		
+		MAX(o.DryBulbFarenheit) OVER (PARTITION BY YEAR(ObservationDate), MONTH(ObservationDate), DAY(ObservationDate)) As DailyHighTemp
+    FROM WeatherObservations o
+	WHERE
+	    State = 'MN'
+		AND City = 'Minneapolis'
+		AND ObservationDate BETWEEN '2016-01-01' AND '2016-12-31'
+)
+SELECT * 
+    FROM DailyHighTemps
+	WHERE DailyHighTemp > 90
+
+		
+		
+		
+		
+-- Fourth Example
 -- Rank Function
 -- ----------------------------------------------------------------------
+
+-- This is the rank function for just one city to show how it works
+WITH DailyHighTemps AS
+(
+    SELECT DISTINCT
+        YEAR(ObservationDate) AS Year,
+	    MONTH(ObservationDate) AS Month,
+		DAY(ObservationDate) As Day,		
+		MAX(o.DryBulbFarenheit) OVER (PARTITION BY YEAR(ObservationDate), MONTH(ObservationDate), DAY(ObservationDate)) As DailyHighTemp
+    FROM WeatherObservations o
+	WHERE
+	    State = 'MN'
+		AND City = 'Minneapolis'
+		AND ObservationDate BETWEEN '2016-01-01' AND '2016-12-31'
+)
+SELECT 
+        Year,
+		Month,
+		Day,
+		DailyHighTemp,
+		RANK() OVER (ORDER BY DailyHighTemp DESC)  As HottestDayRank
+    FROM DailyHighTemps
+	
+
+
+
+
 
 -- This query just gets the daily high temperature for each city and date
 SELECT DISTINCT
@@ -186,3 +254,29 @@ SELECT
 	
 	
 	
+	
+	
+-- Find the 50th percentile of a continuous distribution
+	
+WITH DailyHighTemps AS
+(
+    SELECT DISTINCT
+	    State,
+        City,
+		YEAR(ObservationDate) AS Year,
+	    MONTH(ObservationDate) AS Month,
+		DAY(ObservationDate) As Day,		
+		MAX(o.DryBulbFarenheit) OVER 
+		    (PARTITION BY State, City, YEAR(ObservationDate), MONTH(ObservationDate), DAY(ObservationDate) ) As DailyHighTemp,
+		MIN(o.DryBulbFarenheit) OVER 
+		    (PARTITION BY State, City, YEAR(ObservationDate), MONTH(ObservationDate), DAY(ObservationDate) ) As DailyLowTemp
+    FROM WeatherObservations o
+	WHERE
+	   o.ObservationDate BETWEEN '2016-01-01' AND '2017-01-01'
+)
+SELECT DISTINCT
+        State,
+		City,
+		PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY DailyHighTemp) OVER (PARTITION BY State, City) As MedianHighTemp
+    FROM DailyHighTemps
+	ORDER BY MedianHighTemp	
