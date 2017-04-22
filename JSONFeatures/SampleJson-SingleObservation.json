@@ -1,0 +1,27 @@
+{
+  "stationCode": "14922",
+  "location": {
+    "city": "Minneapolis",
+    "state": "MN",
+    "stationName": "MINNEAPOLIS - ST PAUL INTERNATIONAL AP"
+  },
+  "observationDate": "20160815",
+  "observationTime": "0053",
+  "observationDateTime": "2016-08-15T00:53:00",
+  "skyCondition": "SCT300",
+  "visibility": 10,
+  "dryBulbFarenheit": 69,
+  "dryBulbCelsius": 20.6,
+  "wetBulbFarenheit": 63,
+  "wetBulbCelsius": 17.2,
+  "dewpointFarenheit": 59,
+  "dewpointCelsius": 15,
+  "relativeHumidity": 71,
+  "windSpeed": 0,
+  "windDirection": "000",
+  "stationPressure": 29.18,
+  "seaLevelPressure": null,
+  "recordType": " ",
+  "hourlyPrecip": null,
+  "altimeter": 30.08
+}
